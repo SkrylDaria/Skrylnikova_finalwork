@@ -174,10 +174,10 @@ server <- function(input, output, session) {
     variable_mol <- reactive({
         input$variable_mol
     })
-    features <- reactive({ #описание признаков
+    features <- reactive({ 
       input$features
     })
-    output$descrip <- renderTable({ #описание признаков
+    output$descrip <- renderTable({ 
       description[[features()]]
     })
     output$plotRussia <- renderPlot({
@@ -198,32 +198,32 @@ server <- function(input, output, session) {
     output$eda_mol <- renderPrint({
         summary(moldova[[variable_mol()]])
     })
-    year_amount <- reactive({ #количество лет для предсказания Профет
+    year_amount <- reactive({ 
       input$year_amount
     })
-    datasets <- list('Russia' = russia, 'Moldova' = moldova, 'Belarus' = belarus) #датасеты с тремя странами
-    country <- reactive({    #реактивный выбор страны
+    datasets <- list('Russia' = russia, 'Moldova' = moldova, 'Belarus' = belarus) 
+    country <- reactive({    
       datasets[[input$country]]
     })
-    feature <- reactive({ #реактивный выбор признака
+    feature <- reactive({
       input$feature
     })
     ds <- c('2006-01-01', '2007-01-01', '2008-01-01', '2009-01-01', '2010-01-01', '2011-01-01', '2012-01-01', '2013-01-01', '2014-01-01',
-            '2015-01-01', '2016-01-01', '2017-01-01', '2018-01-01', '2019-01-01', '2020-01-01') #ряд с временным рядом
-    ds <- base::as.Date(ds, format="%Y-%m-%d", tz="UTC") #форматирование в элемент даты
-    df <- reactive({ #создание реактивного датафрейма
+            '2015-01-01', '2016-01-01', '2017-01-01', '2018-01-01', '2019-01-01', '2020-01-01') 
+    ds <- base::as.Date(ds, format="%Y-%m-%d", tz="UTC") 
+    df <- reactive({
       setNames(data.frame(ds, country()[[feature()]]), c("ds", "y"))
     })
-    m <- reactive({  #начало работы модели профет
+    m <- reactive({  
       prophet(df())
     })
-    future <- reactive({ #предсказать на определенное количество лет
+    future <- reactive({ 
       make_future_dataframe(m(), periods = year_amount(), freq = 'year')
     })
-    forecast <- reactive({  #предсказания
+    forecast <- reactive({ 
       predict(m(), future())
     })
-    output$plotProphet <- renderPlot({plot(m(), forecast())}, width = 800, height = 800) #график модели профет
+    output$plotProphet <- renderPlot({plot(m(), forecast())}, width = 800, height = 800) 
     
     years_arima <- reactive({
       input$years_arima
@@ -248,7 +248,7 @@ server <- function(input, output, session) {
       predict(arima(df_ts(), order = c(p_value(),d_value(),q_value())), n.ahead = years_arima())
     })
     
-    output$plotArima <- renderPlot({  #график модели Арма
+    output$plotArima <- renderPlot({ 
       ts.plot(df_ts(),  xlim = c(2006, 2020 + years_arima()), xlab = 'Year', ylab = 'Feature')
       points(AR_forecast()$pred, type = 'l', col = 2, lty = 2)
     })
